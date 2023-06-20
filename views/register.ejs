@@ -1,0 +1,69 @@
+<%- include("partials/header.ejs") %>
+
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col">
+                <h3 class="my-2">Register Here</h3>
+                <form id="registerSubmitForm">
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Enter Name:</label>
+                        <input class="form-control" type="text" name="name" id="name" placeholder="John Doe" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="email">Enter Email:</label>
+                        <input class="form-control" type="text" name="email" id="email" placeholder="john@test.com"
+                            required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="password">Enter Password:</label>
+                        <input class="form-control" type="password" name="password" id="password"
+                            placeholder="john@test.com" required />
+                    </div>
+                    <div class="text-center" style="width: 100%;">
+                        <input class="btn btn-primary my-3" type="submit" style="width: 50%;" />
+                    </div>
+                    <hr />
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById("registerSubmitForm").addEventListener("submit", function (event) {
+            event.preventDefault()
+
+            const name = document.getElementById("name").value
+            const email = document.getElementById("email").value
+            const password = document.getElementById("password").value
+
+            const body = {
+                name,
+                email,
+                password
+            }
+
+            fetch(
+                "/api/auth/register",
+                {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(body)
+                }
+            )
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.error) {
+                        const errorString = JSON.stringify(data.error)
+                        alert(errorString)
+                    } else {
+                        alert(data.message)
+                    }
+                })
+                .catch((error) => alert(error))
+        })
+    </script>
+
+
+    <%- include("partials/footer.ejs") %>

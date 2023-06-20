@@ -1,0 +1,88 @@
+<%- include("partials/header.ejs") %>
+
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col">
+                <h3 class="my-2">Add a new Todo</h3>
+                <form id="todoSubmitForm">
+                    <div class="mb-3">
+                        <label class="form-label" for="title">Enter Title:</label>
+                        <input class="form-control" type="text" name="title" id="title" placeholder="write something..."
+                            required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="description">Enter Description:</label>
+                        <textarea class="form-control" name="description" id="description" rows="3"
+                            placeholder="write something..." required></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="completedRadio" id="completedDone" />
+                        <label class="form-check-label" for="completedDone">Mark done</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="completedRadio" id="completedNotDone"
+                            checked />
+                        <label class="form-check-label" for="completedNotDone">Mark undone</label>
+                    </div>
+                    <div class="form-check"></div>
+                    <div class="text-center" style="width: 100%;">
+                        <input class="btn btn-primary my-3" type="submit" style="width: 50%;" />
+                    </div>
+            </div>
+            <hr />
+            </form>
+        </div>
+    </div>
+    </div>
+    <script>
+        document.getElementById("todoSubmitForm").addEventListener("submit", function (event) {
+            event.preventDefault()
+
+            const title = document.getElementById("title").value
+            const description = document.getElementById("description").value
+            const completedDone = document.getElementById("completedDone")
+
+            const body = {
+                title,
+                description,
+                completed: completedDone.checked ? true : false
+            }
+
+            let token = localStorage.getItem("access_token")
+
+            fetch(
+                "/api/todos",
+                {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-type": "application/json",
+                        "Authorization": token
+                    },
+                    body: JSON.stringify(body)
+                }
+            )
+                .then((response) => {
+                    console.log("---token response--- ", token, response.status)
+
+                    return response.json()
+                        .then((data) => {
+                            if (data.redirect) {
+                                alert("You are not logged in, redirecting to login page.")
+                                window.location.href = "/auth/login"
+                                return
+                            }
+                            if (data.error) {
+                                const errorString = JSON.stringify(data.error)
+                                alert(errorString)
+                            } else {
+                                alert(data.message)
+                            }
+                        })
+                })
+                .catch((error) => alert(error.toString()))
+        })
+    </script>
+
+
+    <%- include("partials/footer.ejs") %>

@@ -1,0 +1,136 @@
+<%- include("partials/header.ejs") %>
+
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col">
+                <h3 class="my-2">Modify Your Todo</h3>
+                <% if(todo) { %>
+                    <form id="todoUpdateForm">
+                        <div class="mb-3">
+                            <label class="form-label" for="title">Enter Title:</label>
+                            <input class="form-control" type="text" name="title" id="title" value="<%=todo.title%>"
+                                placeholder="write something..." />
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Enter Description:</label>
+                            <textarea class="form-control" id="description" rows="3"
+                                required><%=todo.description%></textarea>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="completed" id="completedDone"
+                                <%=todo.completed ? "checked" : "" %>/>
+                            <label class="form-check-label" for="completedDone">
+                                Mark Done
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="completed" id="completedNotDone"
+                                <%=todo.completed ? "" : "checked" %> />
+                            <label class="form-check-label" for="completedFalse">
+                                Not Done
+                            </label>
+                        </div>
+                        <div class="texts-center mt-4">
+                            <input class="btn btn-primary" type="submit" value="Update" />
+                            <button type="button" onclick="deleteTodo(`<%=todo.title%>`)"
+                                class="btn btn-danger">Delete</button>
+                        </div>
+                        <hr />
+                    </form>
+            </div>
+            <% } else { %>
+                <h1>Not Found</h1>
+                <a href="/todos/add" class="my-1 btn btn-outline-primary">Try adding a new Todo...</a>
+                <% } %>
+        </div>
+    </div>
+    </div>
+    <script>
+        document.getElementById("todoUpdateForm").addEventListener("submit", function (event) {
+            event.preventDefault()
+
+            const title = document.getElementById("title").value
+            const description = document.getElementById("description").value
+            const completedDone = document.getElementById("completedDone")
+
+            // for protected route purpose:
+            let token = localStorage.getItem("access_token")
+
+            // console.log("checkbox is ", completedDone.checked);
+            // console.log("checkbox is ", title.value);
+            const body = {
+                title,
+                description,
+                completed: completedDone.checked ? true : false
+            }
+
+            fetch(
+                `/api/todos/${title}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-type": "application/json",
+                        "Authorization": token
+                    },
+                    body: JSON.stringify(body)
+                })
+
+                .then((response) => {
+                    console.log("---Token respone---", token, response.status);
+
+                    return response.json()
+                        .then((data) => {
+                            if (data.redirect) {
+                                alert("You are not logged in. So redirecting you to the login page")
+                                window.location.href = "/auth/login"
+                                return
+                            }
+                            if (data.error) {
+                                const errorString = JSON.stringify(daa.error)
+                            }
+                            else {
+                                alert(data.message)
+                                location.reload()
+                            }
+                        })
+                })
+                // .then((response) => response.json())
+                // .then((data) => alert(data.message))
+                .catch((error) => alert(error.toString()))
+        })
+
+        function deleteTodo(todo_title) {
+            console.log("Deleting todo...", todo_title);
+
+            let token = localStorage.getItem("access_token")
+
+            fetch(`/api/todos/${todo_title}`, {
+                method: "DELETE",
+                headers: {
+                    "authorization": token
+                }
+            })
+                .then((response) => {
+                    return response.json()
+                        .then((data) => {
+
+                            // if for some reason the user deletes localStorage variable and is on the todo page with access to delete button
+                            if (data.redirect) {
+                                alert("Please Sign In")
+                                window.location.href = "/auth/login"
+                                return
+                            }
+
+                            // console.log("Delete msg : ", JSON.stringify(data));
+                            alert(data.message)
+
+                            // taking the user back to the home page so that he cannot update the deleted data as on web page the data still persists and doest change due to not being a react app
+                            window.location.href = "/"
+                        })
+                })
+                .catch((error) => alert(error.toString()))
+        }
+    </script>
+    <%- include("partials/footer") %>

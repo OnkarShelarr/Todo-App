@@ -1,0 +1,38 @@
+<%- include("partials/header.ejs") %>
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col">
+                <ul class="list-group">
+                    <% todos.forEach((todo)=> { %>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="/todos/<%=todo.title%>" class="btn todo-title-row"
+                                style="display: block;width: 100%;text-align: left"
+                                onclick="checkAuth(`/todos/<%=todo.title%>`)">
+                                <%= todo.title %>
+                            </a>
+                            <span class="badge rounded-pill <%= todo.completed ? 'bg-success' : 'bg-danger' %>">
+                                <%= todo.completed ? "done" : "undone" %>
+                            </span>
+                        </li>
+                        <% }) %>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem("access_token")
+
+        function checkAuth(e) {
+            if (!token) {
+                alert("Please Sign in")
+                window.location.href = "/auth/login"
+                return
+            }
+            else {
+                window.location.href = e
+            }
+            return
+        }
+    </script>
+    <%- include("partials/footer.ejs") %>
